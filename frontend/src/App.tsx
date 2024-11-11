@@ -1,9 +1,11 @@
+import Modal from "react-modal"
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
 import Error404 from "./pages/404/Error404"
 import Home from "./pages/home/Home"
 import Login from "./pages/login/Login"
 import SignUp from "./pages/signUp/SignUp"
 
+Modal.setAppElement("#root")
 const App = () => {
     return (
         <Router

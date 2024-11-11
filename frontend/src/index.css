@@ -13,6 +13,9 @@
         background-color: #fdfeff;
         overflow-x: hidden;
     }
+    * {
+        box-sizing: border-box;
+    }
 }
 @layer components {
     .input-box {
@@ -39,6 +42,11 @@
         @apply text-xl 
         text-slate-300
         cursor-pointer
-        hover:text-primary
+        hover:text-primary;
+    }
+    .input-label {
+        @apply text-xs
+        text-slate-400
+        ;
     }
 }
