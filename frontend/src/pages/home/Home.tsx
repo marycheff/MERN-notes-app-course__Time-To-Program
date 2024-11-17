@@ -4,8 +4,15 @@ import Modal from "react-modal"
 import NoteCard from "../../components/cards/NoteCard"
 import Navbar from "../../components/navbar/Navbar"
 import AddEditNotes from "./AddEditNotes"
+
+interface OpenAddEditModal {
+    isShown: boolean
+    type: "add" | "edit"
+    data: object
+}
+
 const Home = () => {
-    const [openAddEditModal, setOpenAddEditModal] = useState({
+    const [openAddEditModal, setOpenAddEditModal] = useState<OpenAddEditModal>({
         isShown: false,
         type: "add",
         data: {},
@@ -48,7 +55,11 @@ const Home = () => {
                 }}
                 contentLabel=""
                 className="w-2/5 max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 overflow-auto">
-                <AddEditNotes onClose={() => setOpenAddEditModal({ ...openAddEditModal, isShown: false })} />
+                <AddEditNotes
+                    type={openAddEditModal.type}
+                    data={openAddEditModal.data}
+                    onClose={() => setOpenAddEditModal({ ...openAddEditModal, isShown: false })}
+                />
             </Modal>
         </>
     )

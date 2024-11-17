@@ -4,13 +4,37 @@ import TagInput from "../../components/input/TagInput"
 
 interface AddEditNotesProps {
     onClose: () => void
+    type: "add" | "edit"
+    data: object
 }
 
-const AddEditNotes: FC<AddEditNotesProps> = ({ onClose }) => {
+const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, onClose }) => {
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     const [tags, setTags] = useState<string[]>([])
     const [error, setError] = useState("")
+
+    const addNewNote = async () => {}
+    const editNote = async () => {}
+
+    const handleAddNote = () => {
+        if (!title) {
+            setError("Введите название")
+            return
+        }
+        if (!content) {
+            setError("Введите содержимое")
+            return
+        }
+        setError("")
+
+        if (type === "edit") {
+            editNote()
+            console.log(data)
+        } else {
+            addNewNote()
+        }
+    }
     return (
         <div className="relative">
             <button
@@ -39,12 +63,13 @@ const AddEditNotes: FC<AddEditNotesProps> = ({ onClose }) => {
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.currentTarget.value)}
                 />
             </div>
+            {error && <p className="text-red-500 text-xs pt-4">{error}</p>}
 
             <div className="mt-3">
                 <label className="input-label">ТЕГИ</label>
                 <TagInput tags={tags} setTags={setTags} />
 
-                <button className="btn-primary font-medium mt-5 p-3" onClick={() => {}}>
+                <button className="btn-primary font-medium mt-5 p-3" onClick={handleAddNote}>
                     ДОБАВИТЬ
                 </button>
             </div>
