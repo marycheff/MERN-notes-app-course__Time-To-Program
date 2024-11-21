@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "ES2020",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "baseUrl": "./src",
+        "paths": {
+            "@dtos/*": ["dtos/*"],
+            "@services/*": ["services/*"],
+            "@controllers/*": ["modules/controllers/*"],
+            "@middleware/*": ["middleware/*"],
+            "@modules/*": ["modules/*"],
+            "@utils/*": ["utils/*"],
+            "@types/*": ["types/*"],
+            "@exceptions/*": ["exceptions/*"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "**/*.test.ts"]
+}
