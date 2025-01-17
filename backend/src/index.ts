@@ -18,8 +18,8 @@ const PORT = process.env.PORT || 3000
 
 mongoose
     .connect(process.env.DATABASE_URL || "")
-    .then(() => console.log("✓ Connected to MongoDB"))
-    .catch(err => console.error("Failed to connect to MongoDB:", err))
+    .then(() => console.log("✓ Подключено к MongoDB"))
+    .catch(err => console.error("Ошибка подключения к MongoDB:", err))
 
 const app = express()
 
@@ -113,14 +113,71 @@ app.post("/add-note", authToken, async (req: Request, res: Response): Promise<vo
     try {
         const note = new Note({ title, content, tags: tags || [], userId: (req as any).user._id })
         await note.save()
-        res.status(200).json({ error: false, note, message: "Заметка успешно создана" })
+        res.status(200).json({
+            error: false,
+            note,
+            message: "Заметка успешно создана",
+        })
     } catch (error) {
-        res.status(500).json({ error: true, message: "Ошибка сервера", details: error })
+        res.status(500).json({
+            error: true,
+            message: "Ошибка сервера",
+            details: error,
+        })
+    }
+})
+
+// Редактирование заметки
+app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response): Promise<void> => {
+    const noteId = req.params.noteId
+    const { title, content, tags, isPinned } = req.body
+    const { user } = req as CustomRequest
+
+    if (!title && !content && !tags) {
+        res.status(400).json({ error: true, message: "Не предоставлены данные для изменения" })
+        return
+    }
+
+    try {
+        const note = await Note.findOne({ _id: noteId, userId: user._id })
+
+        if (!note) {
+            res.status(400).json({ error: true, message: "Нет такой заметки" })
+            return
+        }
+
+        if (title) {
+            note.title = title
+        }
+        if (content) {
+            note.content = content
+        }
+        if (tags) {
+            note.tags = tags
+        }
+        if (isPinned) {
+            note.isPinned = isPinned
+        }
+        note.updatedOn = new Date()
+
+        await note.save()
+
+        res.json({
+            error: false,
+            note,
+            message: "Заметка успешно обновлена",
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: true,
+            message: "Ошибка сервера",
+            details: error,
+        })
     }
 })
 
 app.listen(PORT, () => {
-    console.log(`✓ Listening on port ${PORT}`)
+    console.log(`✓ Сервер запущен. Порт ${PORT}`)
 })
 
 export default app
