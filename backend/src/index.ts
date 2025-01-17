@@ -30,12 +30,12 @@ app.use(
     })
 )
 
-app.get("/", (req: Request, res: Response): void => {
+app.get("/", (req: Request, res: Response) => {
     res.send("Hello World!!!!")
 })
 
 // Создание аккаунта
-app.post("/create-account", async (req: Request, res: Response): Promise<void> => {
+app.post("/create-account", async (req: Request, res: Response) => {
     const { fullName, email, password } = req.body
 
     if (!fullName) {
@@ -72,7 +72,7 @@ app.post("/create-account", async (req: Request, res: Response): Promise<void> =
 })
 
 // Авторизация
-app.post("/login", async (req: Request, res: Response): Promise<void> => {
+app.post("/login", async (req: Request, res: Response) => {
     const { email, password } = req.body
     if (!email) {
         res.status(400).json({ error: true, message: "Поле email не заполнено" })
@@ -128,7 +128,7 @@ app.post("/add-note", authToken, async (req: Request, res: Response): Promise<vo
 })
 
 // Редактирование заметки
-app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response): Promise<void> => {
+app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response) => {
     const noteId = req.params.noteId
     const { title, content, tags, isPinned } = req.body
     const { user } = req as CustomRequest
@@ -166,6 +166,51 @@ app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response): Pr
             error: false,
             note,
             message: "Заметка успешно обновлена",
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: true,
+            message: "Ошибка сервера",
+            details: error,
+        })
+    }
+})
+
+// Получение всех заметок
+app.get("/get-all-notes", authToken, async (req: Request, res: Response) => {
+    const { user } = req as CustomRequest
+
+    try {
+        const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 })
+        res.json({
+            error: false,
+            notes,
+            message: "Заметки успешно получены",
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: true,
+            message: "Ошибка сервера",
+            details: error,
+        })
+    }
+})
+// Удалить заметку
+app.delete("/delete-note/:noteId", authToken, async (req: Request, res: Response) => {
+    const noteId = req.params.noteId
+    const { user } = req as CustomRequest
+    try {
+        const note = await Note.findOne({ _id: noteId, userId: user._id })
+
+        if (!note) {
+            res.status(404).json({ error: true, message: "Заметка не найдена" })
+            return
+        }
+
+        await Note.deleteOne({ _id: noteId, userId: user._id })
+        res.json({
+            error: false,
+            message: "Заметка успешно удалена",
         })
     } catch (error) {
         res.status(500).json({
