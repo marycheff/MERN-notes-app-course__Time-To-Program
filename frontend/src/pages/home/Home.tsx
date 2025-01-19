@@ -1,9 +1,13 @@
-import { useState } from "react"
+import { AxiosError } from "axios"
+import { useEffect, useState } from "react"
 import { MdAdd } from "react-icons/md"
 import Modal from "react-modal"
+import { useNavigate } from "react-router-dom"
 import NoteCard from "../../components/cards/NoteCard"
 import Navbar from "../../components/navbar/Navbar"
+import axiosInstance from "../../utils/axiosInstance"
 import AddEditNotes from "./AddEditNotes"
+import { NavbarProps } from "../../components/navbar/Navbar.props"
 
 interface OpenAddEditModal {
     isShown: boolean
@@ -17,10 +21,42 @@ const Home = () => {
         type: "add",
         data: {},
     })
+    const [error, setError] = useState("")
+    const [userInfo, setUserInfo] = useState<NavbarProps | null>(null)
+
+    const navigate = useNavigate()
+
+    // Получить userInfo
+    const getUserInfo = async () => {
+        try {
+            const response = await axiosInstance.get("/get-user")
+            if (response.data && response.data.user) {
+                setUserInfo(response.data.user)
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    localStorage.clear()
+                    navigate("/login")
+                }
+            } else {
+                setError("Непредвиденная ошибка. Перезагрузите страницу")
+            }
+        }
+    }
+
+    useEffect(() => {
+        getUserInfo()
+        return () => {}
+    }, [])
+
+    if (error) {
+        return <p className="text-red-500 text-xs">{error}</p>
+    }
 
     return (
         <>
-            <Navbar />
+            <Navbar userInfo={userInfo} />
             {/* Пример заметки */}
             <div className="container mx-auto">
                 <div className="grid grid-cols-3 gap-4 mt-8">

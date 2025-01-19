@@ -107,7 +107,14 @@ app.get("/get-user", authToken, async (req: Request, res: Response) => {
         res.sendStatus(401)
         return
     }
-    res.status(200).json({ error: false, user: isUser, message: "Данные пользователя успешно получены" })
+    const userInfo = {
+        fullName: isUser.fullName,
+        email: isUser.email,
+        _id: isUser._id,
+        createdOn: isUser.createdOn,
+    }
+
+    res.status(200).json({ error: false, user: userInfo, message: "Данные пользователя успешно получены" })
 })
 
 // Добавление заметки
@@ -274,4 +281,3 @@ app.listen(PORT, () => {
 })
 
 export default app
-
