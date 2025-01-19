@@ -97,8 +97,21 @@ app.post("/login", async (req: Request, res: Response) => {
     }
 })
 
+// Получить пользователя
+app.get("/get-user", authToken, async (req: Request, res: Response) => {
+    const { user } = req as CustomRequest
+
+    const isUser = await User.findOne({ _id: user.user._id })
+
+    if (!isUser) {
+        res.sendStatus(401)
+        return
+    }
+    res.status(200).json({ error: false, user: isUser, message: "Данные пользователя успешно получены" })
+})
+
 // Добавление заметки
-app.post("/add-note", authToken, async (req: Request, res: Response): Promise<void> => {
+app.post("/add-note", authToken, async (req: Request, res: Response) => {
     const { title, content, tags } = req.body
     const { user } = req as CustomRequest
     if (!title) {
@@ -179,6 +192,7 @@ app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response) => 
 // Получение всех заметок
 app.get("/get-all-notes", authToken, async (req: Request, res: Response) => {
     const { user } = req as CustomRequest
+    console.log(user)
 
     try {
         const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 })
@@ -221,8 +235,43 @@ app.delete("/delete-note/:noteId", authToken, async (req: Request, res: Response
     }
 })
 
+// Изменить закрепление заметки
+app.put("/update-note-pinned/:noteId", authToken, async (req: Request, res: Response) => {
+    const noteId = req.params.noteId
+    const { isPinned } = req.body
+    const { user } = req as CustomRequest
+
+    try {
+        const note = await Note.findOne({ _id: noteId, userId: user._id })
+
+        if (!note) {
+            res.status(400).json({ error: true, message: "Нет такой заметки" })
+            return
+        }
+
+        note.isPinned = isPinned
+
+        note.updatedOn = new Date()
+
+        await note.save()
+
+        res.json({
+            error: false,
+            note,
+            message: "Заметка успешно обновлена",
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: true,
+            message: "Ошибка сервера",
+            details: error,
+        })
+    }
+})
+
 app.listen(PORT, () => {
     console.log(`✓ Сервер запущен. Порт ${PORT}`)
 })
 
 export default app
+
