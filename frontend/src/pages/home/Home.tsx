@@ -5,14 +5,23 @@ import Modal from "react-modal"
 import { useNavigate } from "react-router-dom"
 import NoteCard from "../../components/cards/NoteCard"
 import Navbar from "../../components/navbar/Navbar"
+import { NavbarProps } from "../../components/navbar/Navbar.props"
 import axiosInstance from "../../utils/axiosInstance"
 import AddEditNotes from "./AddEditNotes"
-import { NavbarProps } from "../../components/navbar/Navbar.props"
 
 interface OpenAddEditModal {
     isShown: boolean
     type: "add" | "edit"
     data: object
+}
+interface Note {
+    _id: string
+    title: string
+    content: string
+    tags: string[]
+    isPinned: boolean
+    createdOn: string // или Date, если вы хотите работать с объектами Date
+    updatedOn: string // или Date
 }
 
 const Home = () => {
@@ -23,6 +32,7 @@ const Home = () => {
     })
     const [error, setError] = useState("")
     const [userInfo, setUserInfo] = useState<NavbarProps | null>(null)
+    const [allNotes, setAllNotes] = useState<Note[]>([])
 
     const navigate = useNavigate()
 
@@ -45,8 +55,21 @@ const Home = () => {
         }
     }
 
+    // Получить все заметки
+    const getAllNotes = async () => {
+        try {
+            const response = await axiosInstance.get("/get-all-notes")
+            if (response.data.notes) {
+                setAllNotes(response.data.notes)
+            }
+        } catch {
+            setError("Непредвиденная ошибка. Перезагрузите страницу")
+        }
+    }
+
     useEffect(() => {
         getUserInfo()
+        getAllNotes()
         return () => {}
     }, [])
 
@@ -58,7 +81,7 @@ const Home = () => {
         <>
             <Navbar userInfo={userInfo} />
             {/* Пример заметки */}
-            <div className="container mx-auto">
+            {/* <div className="container mx-auto">
                 <div className="grid grid-cols-3 gap-4 mt-8">
                     <NoteCard
                         title="Встреча 7го апреля"
@@ -70,6 +93,23 @@ const Home = () => {
                         onDelete={() => {}}
                         onPinNote={() => {}}
                     />
+                </div>
+            </div> */}
+            <div className="container mx-auto">
+                <div className="grid grid-cols-3 gap-4 mt-8">
+                    {allNotes.map((item) => (
+                        <NoteCard
+                            key={item._id}
+                            title={item.title}
+                            date={item.createdOn}
+                            content={item.content}
+                            tags={item.tags}
+                            isPinned={item.isPinned}
+                            onEdit={() => {}}
+                            onDelete={() => {}}
+                            onPinNote={() => {}}
+                        />
+                    ))}
                 </div>
             </div>
 

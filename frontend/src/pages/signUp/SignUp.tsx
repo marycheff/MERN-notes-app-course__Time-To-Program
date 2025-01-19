@@ -1,7 +1,9 @@
+import { AxiosError } from "axios"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import PasswordInput from "../../components/input/PasswordInput"
 import Navbar from "../../components/navbar/Navbar"
+import axiosInstance from "../../utils/axiosInstance"
 import { validateEmail } from "../../utils/helper"
 
 const SignUp = () => {
@@ -9,6 +11,7 @@ const SignUp = () => {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
+    const navigate = useNavigate()
 
     const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -26,10 +29,36 @@ const SignUp = () => {
             return
         }
         setError("")
+
+        // Обращение к API
+        try {
+            const response = await axiosInstance.post("/create-account", {
+                fullName: name,
+                email: email,
+                password: password,
+            })
+
+            if (response.data && response.data.error) {
+                setError(response.data.error)
+                return
+            }
+            if (response.data && response.data.accessToken) {
+                localStorage.setItem("token", response.data.accessToken)
+                navigate("/dashboard")
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setError(error.response.data.message)
+                }
+            } else {
+                setError("Непредвиденная ошибка. Перезагрузите страницу")
+            }
+        }
     }
     return (
         <>
-            <Navbar />
+            <Navbar userInfo={null} />
             <div className="flex items-center justify-center mt-28">
                 <div className="w-96 border rounded bg-white px-7 py-10">
                     <form onSubmit={handleSignUp}>
