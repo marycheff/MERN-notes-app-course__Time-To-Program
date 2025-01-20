@@ -5,12 +5,13 @@ import TagInput from "../../../components/input/TagInput/TagInput"
 import axiosInstance from "../../../utils/axiosInstance"
 import { AddEditNotesProps } from "./AddEditNotes.props"
 
-const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, getAllNotes, onClose }) => {
+const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, getAllNotes, onClose, showToastMessage }) => {
     const [title, setTitle] = useState(data?.title || "")
     const [content, setContent] = useState(data?.content || "")
     const [tags, setTags] = useState(data?.tags || [])
     const [error, setError] = useState("")
 
+    // Добавление заметки
     const addNewNote = async () => {
         try {
             const response = await axiosInstance.post("/add-note", {
@@ -20,6 +21,7 @@ const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, getAllNotes, onClose 
             })
 
             if (response.data && response.data.note) {
+                showToastMessage("Заметка добавлена успешно")
                 getAllNotes()
                 onClose()
             }
@@ -33,6 +35,7 @@ const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, getAllNotes, onClose 
             }
         }
     }
+    // Изменение заметки
     const editNote = async () => {
         const noteId = data._id
         try {
@@ -43,6 +46,7 @@ const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, getAllNotes, onClose 
             })
 
             if (response.data && response.data.note) {
+                showToastMessage("Заметка обновлена успешно")
                 getAllNotes()
                 onClose()
             }

@@ -5,4 +5,5 @@ export interface AddEditNotesProps {
     type: "add" | "edit"
     data: Note
     getAllNotes: () => void
+    showToastMessage: (message: string, type?: "add" | "delete") => void
 }

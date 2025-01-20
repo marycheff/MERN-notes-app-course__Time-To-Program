@@ -1,6 +1,7 @@
 import NoteCard from "@/components/cards/NoteCard/NoteCard"
 import Navbar from "@/components/navbar/Navbar"
 import { NavbarProps } from "@/components/navbar/Navbar.props"
+import Toast from "@/components/toastMessage/Toast"
 import AddEditNotes from "@/pages/home/AddEditNotes/AddEditNotes"
 import { Note } from "@/types/Note"
 import axiosInstance from "@/utils/axiosInstance"
@@ -15,12 +16,22 @@ interface OpenAddEditModal {
     type: "add" | "edit"
     data: Note
 }
+interface ToastMsg {
+    isShown: boolean
+    message: string
+    type?: "add" | "delete"
+}
 
 const Home = () => {
     const [openAddEditModal, setOpenAddEditModal] = useState<OpenAddEditModal>({
         isShown: false,
         type: "add",
         data: {},
+    })
+    const [showToastMsg, setShowToastMsg] = useState<ToastMsg>({
+        isShown: false,
+        message: "",
+        type: "delete",
     })
 
     const [error, setError] = useState("")
@@ -31,6 +42,21 @@ const Home = () => {
 
     const handleEdit = (noteDetails: object) => {
         setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" })
+    }
+    const showToastMessage = (message: string, type?: ToastMsg["type"]) => {
+        const newToastMsg: ToastMsg = {
+            isShown: true,
+            message: message,
+            type: type,
+        }
+        setShowToastMsg(newToastMsg)
+    }
+
+    const handleCloseToast = () => {
+        setShowToastMsg({
+            isShown: false,
+            message: "",
+        })
     }
 
     // Получить userInfo
@@ -61,6 +87,26 @@ const Home = () => {
             }
         } catch {
             setError("Непредвиденная ошибка. Перезагрузите страницу")
+        }
+    }
+
+    const deleteNote = async (data: Note) => {
+        const noteId = data._id
+        try {
+            const response = await axiosInstance.delete(`/delete-note/${noteId}`)
+
+            if (response.data && !response.data.error) {
+                showToastMessage("Заметка удалена успешно", "delete")
+                getAllNotes()
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setError(error.response.data.message)
+                }
+            } else {
+                setError("Непредвиденная ошибка")
+            }
         }
     }
 
@@ -103,7 +149,7 @@ const Home = () => {
                             tags={item.tags}
                             isPinned={item.isPinned}
                             onEdit={() => handleEdit(item)}
-                            onDelete={() => {}}
+                            onDelete={() => deleteNote(item)}
                             onPinNote={() => {}}
                         />
                     ))}
@@ -113,14 +159,14 @@ const Home = () => {
             {/* Кнопка добавления заметки */}
             <button
                 className="w-16 h-16 flex items-center justify-center rounded-full bg-primary hover:bg-blue-600 absolute bottom-10 right-10"
-                onClick={() => setOpenAddEditModal({ ...openAddEditModal, isShown: true })}>
+                onClick={() => setOpenAddEditModal({ type: "add", isShown: true, data: {} })}>
                 <MdAdd className="text-[32px] text-white" />
             </button>
 
             {/* Модальное окно для добавления/редактирования заметки */}
             <Modal
                 isOpen={openAddEditModal.isShown}
-                onRequestClose={() => setOpenAddEditModal({ ...openAddEditModal, isShown: false })}
+                onRequestClose={() => setOpenAddEditModal({ ...openAddEditModal, isShown: false, type: "edit" })}
                 style={{
                     overlay: {
                         backgroundColor: "rgba(0, 0, 0, 0.2)",
@@ -133,8 +179,15 @@ const Home = () => {
                     type={openAddEditModal.type}
                     data={openAddEditModal.data}
                     onClose={() => setOpenAddEditModal({ ...openAddEditModal, isShown: false })}
+                    showToastMessage={showToastMessage}
                 />
             </Modal>
+            <Toast
+                isShown={showToastMsg.isShown}
+                message={showToastMsg.message}
+                onClose={handleCloseToast}
+                type={showToastMsg.type}
+            />
         </>
     )
 }
