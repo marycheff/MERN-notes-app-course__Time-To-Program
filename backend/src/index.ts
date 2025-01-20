@@ -199,7 +199,6 @@ app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response) => 
 // Получение всех заметок
 app.get("/get-all-notes", authToken, async (req: Request, res: Response) => {
     const { user } = req as CustomRequest
-    console.log(user)
 
     try {
         const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 })

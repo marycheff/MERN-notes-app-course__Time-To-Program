@@ -1,27 +1,19 @@
+import NoteCard from "@/components/cards/NoteCard/NoteCard"
+import Navbar from "@/components/navbar/Navbar"
+import { NavbarProps } from "@/components/navbar/Navbar.props"
+import AddEditNotes from "@/pages/home/AddEditNotes/AddEditNotes"
+import { Note } from "@/types/Note"
+import axiosInstance from "@/utils/axiosInstance"
 import { AxiosError } from "axios"
 import { useEffect, useState } from "react"
 import { MdAdd } from "react-icons/md"
 import Modal from "react-modal"
 import { useNavigate } from "react-router-dom"
-import NoteCard from "../../components/cards/NoteCard"
-import Navbar from "../../components/navbar/Navbar"
-import { NavbarProps } from "../../components/navbar/Navbar.props"
-import axiosInstance from "../../utils/axiosInstance"
-import AddEditNotes from "./AddEditNotes"
 
 interface OpenAddEditModal {
     isShown: boolean
     type: "add" | "edit"
-    data: object
-}
-interface Note {
-    _id: string
-    title: string
-    content: string
-    tags: string[]
-    isPinned: boolean
-    createdOn: string // или Date, если вы хотите работать с объектами Date
-    updatedOn: string // или Date
+    data: Note
 }
 
 const Home = () => {
@@ -30,11 +22,16 @@ const Home = () => {
         type: "add",
         data: {},
     })
+
     const [error, setError] = useState("")
     const [userInfo, setUserInfo] = useState<NavbarProps | null>(null)
     const [allNotes, setAllNotes] = useState<Note[]>([])
 
     const navigate = useNavigate()
+
+    const handleEdit = (noteDetails: object) => {
+        setOpenAddEditModal({ isShown: true, data: noteDetails, type: "edit" })
+    }
 
     // Получить userInfo
     const getUserInfo = async () => {
@@ -97,7 +94,7 @@ const Home = () => {
             </div> */}
             <div className="container mx-auto">
                 <div className="grid grid-cols-3 gap-4 mt-8">
-                    {allNotes.map((item) => (
+                    {allNotes.map(item => (
                         <NoteCard
                             key={item._id}
                             title={item.title}
@@ -105,7 +102,7 @@ const Home = () => {
                             content={item.content}
                             tags={item.tags}
                             isPinned={item.isPinned}
-                            onEdit={() => {}}
+                            onEdit={() => handleEdit(item)}
                             onDelete={() => {}}
                             onPinNote={() => {}}
                         />
@@ -132,6 +129,7 @@ const Home = () => {
                 contentLabel=""
                 className="w-2/5 max-h-3/4 bg-white rounded-md mx-auto mt-14 p-5 overflow-auto">
                 <AddEditNotes
+                    getAllNotes={getAllNotes}
                     type={openAddEditModal.type}
                     data={openAddEditModal.data}
                     onClose={() => setOpenAddEditModal({ ...openAddEditModal, isShown: false })}

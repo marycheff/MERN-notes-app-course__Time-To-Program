@@ -1,8 +1,8 @@
+import ProfileInfo from "@/components/cards/ProfileInfo"
+import { NavbarProps } from "@/components/navbar/Navbar.props"
+import SearchBar from "@/components/searchBar/SearchBar"
 import { FC, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import ProfileInfo from "../cards/ProfileInfo"
-import SearchBar from "../searchBar/SearchBar"
-import { NavbarProps } from "./Navbar.props"
 
 const Navbar: FC<{ userInfo: NavbarProps | null }> = ({ userInfo }) => {
     const navigate = useNavigate()
@@ -24,7 +24,7 @@ const Navbar: FC<{ userInfo: NavbarProps | null }> = ({ userInfo }) => {
                 handleSearch={handleSearch}
                 onClearSearch={handleClearSearch}
             />
-            
+
             <ProfileInfo userInfo={userInfo} onLogout={onLogout} />
         </div>
     )

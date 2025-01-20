@@ -1,10 +1,10 @@
+import PasswordInput from "@/components/input/PasswordInput/PasswordInput"
+import Navbar from "@/components/navbar/Navbar"
+import axiosInstance from "@/utils/axiosInstance"
+import { validateEmail } from "@/utils/helper"
 import { AxiosError } from "axios"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import PasswordInput from "../../components/input/PasswordInput"
-import Navbar from "../../components/navbar/Navbar"
-import axiosInstance from "../../utils/axiosInstance"
-import { validateEmail } from "../../utils/helper"
 
 const Login = () => {
     const [email, setEmail] = useState("")

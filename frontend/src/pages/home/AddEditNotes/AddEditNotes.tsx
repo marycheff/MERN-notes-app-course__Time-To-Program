@@ -1,21 +1,61 @@
+import { AxiosError } from "axios"
 import { FC, useState } from "react"
 import { MdClose } from "react-icons/md"
-import TagInput from "../../components/input/TagInput"
+import TagInput from "../../../components/input/TagInput/TagInput"
+import axiosInstance from "../../../utils/axiosInstance"
+import { AddEditNotesProps } from "./AddEditNotes.props"
 
-interface AddEditNotesProps {
-    onClose: () => void
-    type: "add" | "edit"
-    data: object
-}
-
-const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, onClose }) => {
-    const [title, setTitle] = useState("")
-    const [content, setContent] = useState("")
-    const [tags, setTags] = useState<string[]>([])
+const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, getAllNotes, onClose }) => {
+    const [title, setTitle] = useState(data?.title || "")
+    const [content, setContent] = useState(data?.content || "")
+    const [tags, setTags] = useState(data?.tags || [])
     const [error, setError] = useState("")
 
-    const addNewNote = async () => {}
-    const editNote = async () => {}
+    const addNewNote = async () => {
+        try {
+            const response = await axiosInstance.post("/add-note", {
+                title,
+                content,
+                tags,
+            })
+
+            if (response.data && response.data.note) {
+                getAllNotes()
+                onClose()
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setError(error.response.data.message)
+                }
+            } else {
+                setError("Непредвиденная ошибка")
+            }
+        }
+    }
+    const editNote = async () => {
+        const noteId = data._id
+        try {
+            const response = await axiosInstance.put(`/edit-note/${noteId}`, {
+                title,
+                content,
+                tags,
+            })
+
+            if (response.data && response.data.note) {
+                getAllNotes()
+                onClose()
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setError(error.response.data.message)
+                }
+            } else {
+                setError("Непредвиденная ошибка")
+            }
+        }
+    }
 
     const handleAddNote = () => {
         if (!title) {
@@ -30,7 +70,6 @@ const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, onClose }) => {
 
         if (type === "edit") {
             editNote()
-            console.log(data)
         } else {
             addNewNote()
         }
@@ -70,7 +109,7 @@ const AddEditNotes: FC<AddEditNotesProps> = ({ type, data, onClose }) => {
                 <TagInput tags={tags} setTags={setTags} />
 
                 <button className="btn-primary font-medium mt-5 p-3" onClick={handleAddNote}>
-                    ДОБАВИТЬ
+                    {type == "edit" ? "ИЗМЕНИТЬ" : "ДОБАВИТЬ"}
                 </button>
             </div>
         </div>

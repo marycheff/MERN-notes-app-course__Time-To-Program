@@ -1,10 +1,6 @@
+import { TagInputProps } from "@/components/input/TagInput/TagInput.props"
 import { FC, useState } from "react"
 import { MdAdd, MdClose } from "react-icons/md"
-
-interface TagInputProps {
-    tags?: string[]
-    setTags?: React.Dispatch<React.SetStateAction<string[]>>
-}
 
 const TagInput: FC<TagInputProps> = ({ tags, setTags }) => {
     const [inputValue, setInputValue] = useState("")
@@ -14,10 +10,7 @@ const TagInput: FC<TagInputProps> = ({ tags, setTags }) => {
     const addNewTag = () => {
         if (inputValue.trim() !== "") {
             setTags?.([...(tags || []), inputValue])
-            console.log(inputValue)
-            
             setInputValue("")
-            console.log(inputValue)
         }
     }
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

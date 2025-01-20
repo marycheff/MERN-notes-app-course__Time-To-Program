@@ -1,12 +1,7 @@
+import { SearchBarProps } from "@/components/searchBar/SearchBar.props"
 import { FC } from "react"
 import { FaSearch } from "react-icons/fa"
 import { IoMdClose } from "react-icons/io"
-interface SearchBarProps {
-    value: string
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-    handleSearch: (event: React.MouseEvent<SVGElement>) => void
-    onClearSearch: (event: React.MouseEvent<SVGElement>) => void
-}
 
 const SearchBar: FC<SearchBarProps> = ({ value, onChange, handleSearch, onClearSearch }) => {
     return (

@@ -1,11 +1,6 @@
-import { ChangeEvent, FC, useState } from "react"
+import { PasswordInputProps } from "@/components/input/PasswordInput/PasswordInput.props"
+import { FC, useState } from "react"
 // import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6"
-
-interface PasswordInputProps {
-    value?: string
-    onChange?: (event: ChangeEvent<HTMLInputElement>) => void
-    placeholder?: string
-}
 
 const PasswordInput: FC<PasswordInputProps> = ({ value, onChange, placeholder }) => {
     const [isShowPassword, setIsShowPassword] = useState(false)
