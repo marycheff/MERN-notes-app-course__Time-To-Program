@@ -14,10 +14,11 @@ const App = () => {
                 v7_relativeSplatPath: true,
             }}>
             <Routes>
-                <Route path="/dashboard" element={<Home />} />
+                {/* <Route path="/dashboard" element={<Home />} /> */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/signUp" element={<SignUp />} />
                 <Route path="*" element={<Error404 />} />
+                <Route path="/" element={<Home />} />
             </Routes>
         </Router>
     )
