@@ -9,9 +9,21 @@ import Note from "./models/note.model"
 import User from "./models/user.model"
 import { authToken } from "./utilities"
 
-interface CustomRequest extends Request {
-    user: any
+interface AuthenticatedRequest extends Request {
+    user: {
+        user: {
+            fullName: string
+            email: string
+            password: string
+            _id: string
+            createdOn: string
+            __v: number
+        }
+        iat: number
+        exp: number
+    }
 }
+
 dotenv.config()
 
 const PORT = process.env.PORT || 3000
@@ -99,7 +111,7 @@ app.post("/login", async (req: Request, res: Response) => {
 
 // Получить пользователя
 app.get("/get-user", authToken, async (req: Request, res: Response) => {
-    const { user } = req as CustomRequest
+    const { user } = req as AuthenticatedRequest
 
     const isUser = await User.findOne({ _id: user.user._id })
 
@@ -120,7 +132,7 @@ app.get("/get-user", authToken, async (req: Request, res: Response) => {
 // Добавление заметки
 app.post("/add-note", authToken, async (req: Request, res: Response) => {
     const { title, content, tags } = req.body
-    const { user } = req as CustomRequest
+    const { user } = req as AuthenticatedRequest
     if (!title) {
         res.status(400).json({ error: true, message: "Поле title не заполнено" })
         return
@@ -131,7 +143,7 @@ app.post("/add-note", authToken, async (req: Request, res: Response) => {
     }
 
     try {
-        const note = new Note({ title, content, tags: tags || [], userId: (req as any).user._id })
+        const note = new Note({ title, content, tags: tags || [], userId: user.user._id })
         await note.save()
         res.status(200).json({
             error: false,
@@ -151,7 +163,7 @@ app.post("/add-note", authToken, async (req: Request, res: Response) => {
 app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response) => {
     const noteId = req.params.noteId
     const { title, content, tags, isPinned } = req.body
-    const { user } = req as CustomRequest
+    const { user } = req as AuthenticatedRequest
 
     if (!title && !content && !tags) {
         res.status(400).json({ error: true, message: "Не предоставлены данные для изменения" })
@@ -159,7 +171,7 @@ app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response) => 
     }
 
     try {
-        const note = await Note.findOne({ _id: noteId, userId: user._id })
+        const note = await Note.findOne({ _id: noteId, userId: user.user._id })
 
         if (!note) {
             res.status(400).json({ error: true, message: "Нет такой заметки" })
@@ -198,10 +210,10 @@ app.put("/edit-note/:noteId", authToken, async (req: Request, res: Response) => 
 
 // Получение всех заметок
 app.get("/get-all-notes", authToken, async (req: Request, res: Response) => {
-    const { user } = req as CustomRequest
+    const { user } = req as AuthenticatedRequest
 
     try {
-        const notes = await Note.find({ userId: user._id }).sort({ isPinned: -1 })
+        const notes = await Note.find({ userId: user.user._id }).sort({ isPinned: -1 })
         res.json({
             error: false,
             notes,
@@ -218,16 +230,16 @@ app.get("/get-all-notes", authToken, async (req: Request, res: Response) => {
 // Удалить заметку
 app.delete("/delete-note/:noteId", authToken, async (req: Request, res: Response) => {
     const noteId = req.params.noteId
-    const { user } = req as CustomRequest
+    const { user } = req as AuthenticatedRequest
     try {
-        const note = await Note.findOne({ _id: noteId, userId: user._id })
+        const note = await Note.findOne({ _id: noteId, userId: user.user._id })
 
         if (!note) {
             res.status(404).json({ error: true, message: "Заметка не найдена" })
             return
         }
 
-        await Note.deleteOne({ _id: noteId, userId: user._id })
+        await Note.deleteOne({ _id: noteId, userId: user.user._id })
         res.json({
             error: false,
             message: "Заметка успешно удалена",
@@ -245,10 +257,10 @@ app.delete("/delete-note/:noteId", authToken, async (req: Request, res: Response
 app.put("/update-note-pinned/:noteId", authToken, async (req: Request, res: Response) => {
     const noteId = req.params.noteId
     const { isPinned } = req.body
-    const { user } = req as CustomRequest
+    const { user } = req as AuthenticatedRequest
 
     try {
-        const note = await Note.findOne({ _id: noteId, userId: user._id })
+        const note = await Note.findOne({ _id: noteId, userId: user.user._id })
 
         if (!note) {
             res.status(400).json({ error: true, message: "Нет такой заметки" })
@@ -265,6 +277,36 @@ app.put("/update-note-pinned/:noteId", authToken, async (req: Request, res: Resp
             error: false,
             note,
             message: "Заметка успешно обновлена",
+        })
+    } catch (error) {
+        res.status(500).json({
+            error: true,
+            message: "Ошибка сервера",
+            details: error,
+        })
+    }
+})
+
+app.get("/search-notes", authToken, async (req: Request, res: Response) => {
+    const { user } = req as AuthenticatedRequest
+    const { query } = req.query
+
+    if (!query || typeof query !== "string") {
+        res.status(400).json({ error: true, message: "Не предоставлен запрос" })
+        return
+    }
+
+    try {
+        const matchingNotes = await Note.find({
+            userId: user.user._id,
+
+            $or: [{ title: { $regex: new RegExp(query, "i") } }, { content: { $regex: new RegExp(query, "i") } }],
+        })
+
+        res.json({
+            error: false,
+            notes: matchingNotes,
+            message: "Заметки, соответствующие поисковому запросу, были успешно получены",
         })
     } catch (error) {
         res.status(500).json({

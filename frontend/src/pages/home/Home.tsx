@@ -1,4 +1,6 @@
+import AddNotesImg from "@/assets/images/add-notes.svg"
 import NoteCard from "@/components/cards/NoteCard/NoteCard"
+import EmptyCard from "@/components/emptyCard/EmptyCard"
 import Navbar from "@/components/navbar/Navbar"
 import { NavbarProps } from "@/components/navbar/Navbar.props"
 import Toast from "@/components/toastMessage/Toast"
@@ -10,7 +12,6 @@ import { useEffect, useState } from "react"
 import { MdAdd } from "react-icons/md"
 import Modal from "react-modal"
 import { useNavigate } from "react-router-dom"
-
 interface OpenAddEditModal {
     isShown: boolean
     type: "add" | "edit"
@@ -139,21 +140,28 @@ const Home = () => {
                 </div>
             </div> */}
             <div className="container mx-auto">
-                <div className="grid grid-cols-3 gap-4 mt-8">
-                    {allNotes.map(item => (
-                        <NoteCard
-                            key={item._id}
-                            title={item.title}
-                            date={item.createdOn}
-                            content={item.content}
-                            tags={item.tags}
-                            isPinned={item.isPinned}
-                            onEdit={() => handleEdit(item)}
-                            onDelete={() => deleteNote(item)}
-                            onPinNote={() => {}}
-                        />
-                    ))}
-                </div>
+                {allNotes.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-4 mt-8">
+                        {allNotes.map(item => (
+                            <NoteCard
+                                key={item._id}
+                                title={item.title}
+                                date={item.createdOn}
+                                content={item.content}
+                                tags={item.tags}
+                                isPinned={item.isPinned}
+                                onEdit={() => handleEdit(item)}
+                                onDelete={() => deleteNote(item)}
+                                onPinNote={() => {}}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <EmptyCard
+                        imgSrc={AddNotesImg}
+                        message=" Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque, aut eius iure ullam neque nihil vero rem unde illo nulla."
+                    />
+                )}
             </div>
 
             {/* Кнопка добавления заметки */}
