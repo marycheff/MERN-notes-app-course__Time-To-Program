@@ -1,6 +1,6 @@
-import { BASE_URL } from "@/utils/constants"
-import axios from "axios"
 
+import axios from "axios"
+const BASE_URL = import.meta.env.VITE_REACT_APP_BACKEND_BASE_URL //|| "http://localhost:3000"
 const axiosInstance = axios.create({
     baseURL: BASE_URL,
     timeout: 10000,
