@@ -1,9 +1,9 @@
-import { NavbarProps } from "@/components/navbar/Navbar.props"
+import { User } from "@/types/User"
 import { getInitials } from "@/utils/helper"
 import React, { FC } from "react"
 
 interface ProfileInfoProps {
-    userInfo: NavbarProps | null
+    userInfo: User | null
     onLogout: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
 

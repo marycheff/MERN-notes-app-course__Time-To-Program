@@ -1,11 +1,12 @@
 import AddNotesImg from "@/assets/images/add-notes.svg"
+import NodDataImg from "@/assets/images/no-data.svg"
 import NoteCard from "@/components/cards/NoteCard/NoteCard"
 import EmptyCard from "@/components/emptyCard/EmptyCard"
 import Navbar from "@/components/navbar/Navbar"
-import { NavbarProps } from "@/components/navbar/Navbar.props"
 import Toast from "@/components/toastMessage/Toast"
 import AddEditNotes from "@/pages/home/AddEditNotes/AddEditNotes"
 import { Note } from "@/types/Note"
+import { User } from "@/types/User"
 import axiosInstance from "@/utils/axiosInstance"
 import { AxiosError } from "axios"
 import { useEffect, useState } from "react"
@@ -36,8 +37,10 @@ const Home = () => {
     })
 
     const [error, setError] = useState("")
-    const [userInfo, setUserInfo] = useState<NavbarProps | null>(null)
+    const [userInfo, setUserInfo] = useState<User | null>(null)
     const [allNotes, setAllNotes] = useState<Note[]>([])
+    const [isLoading, setIsLoading] = useState(false)
+    const [isSearch, setIsSearch] = useState(false)
 
     const navigate = useNavigate()
 
@@ -82,15 +85,18 @@ const Home = () => {
     // Получить все заметки
     const getAllNotes = async () => {
         try {
+            setIsLoading(true)
             const response = await axiosInstance.get("/get-all-notes")
             if (response.data.notes) {
                 setAllNotes(response.data.notes)
+                setIsLoading(false)
             }
         } catch {
             setError("Непредвиденная ошибка. Перезагрузите страницу")
+            setIsLoading(false)
         }
     }
-
+    // Удалить заметку
     const deleteNote = async (data: Note) => {
         const noteId = data._id
         try {
@@ -111,6 +117,33 @@ const Home = () => {
         }
     }
 
+    // Поиск заметки
+    const onSearchNote = async (query: string) => {
+        try {
+            const response = await axiosInstance.get("/search-notes", {
+                params: { query },
+            })
+
+            if (response.data && response.data.notes) {
+                setIsSearch(true)
+                setAllNotes(response.data.notes)
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setError(error.response.data.message)
+                }
+            } else {
+                setError("Непредвиденная ошибка")
+            }
+        }
+    }
+
+    const handleClearSearch = () => {
+        setIsSearch(false)
+        getAllNotes()
+    }
+
     useEffect(() => {
         getUserInfo()
         getAllNotes()
@@ -120,10 +153,13 @@ const Home = () => {
     if (error) {
         return <p className="text-red-500 text-xs">{error}</p>
     }
+    // if (isLoading) {
+    //     return <p className="text-red-500 text-xs">Загрузка</p>
+    // }
 
     return (
         <>
-            <Navbar userInfo={userInfo} />
+            <Navbar userInfo={userInfo} onSearchNote={onSearchNote} handleClearSearch={handleClearSearch} />
             {/* Пример заметки */}
             {/* <div className="container mx-auto">
                 <div className="grid grid-cols-3 gap-4 mt-8">
@@ -140,7 +176,9 @@ const Home = () => {
                 </div>
             </div> */}
             <div className="container mx-auto">
-                {allNotes.length > 0 ? (
+                {isLoading ? (
+                    <></>
+                ) : allNotes.length > 0 ? (
                     <div className="grid grid-cols-3 gap-4 mt-8">
                         {allNotes.map(item => (
                             <NoteCard
@@ -158,8 +196,12 @@ const Home = () => {
                     </div>
                 ) : (
                     <EmptyCard
-                        imgSrc={AddNotesImg}
-                        message=" Lorem ipsum dolor sit amet consectetur adipisicing elit. Eaque, aut eius iure ullam neque nihil vero rem unde illo nulla."
+                        imgSrc={isSearch ? NodDataImg : AddNotesImg}
+                        message={
+                            isSearch
+                                ? "Ничего не нашлось"
+                                : "У вас нет заметок"
+                        }
                     />
                 )}
             </div>

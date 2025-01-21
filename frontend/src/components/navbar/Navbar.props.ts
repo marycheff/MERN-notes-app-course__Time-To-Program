@@ -1,6 +1,7 @@
+import { User } from "@/types/User"
+
 export interface NavbarProps {
-    fullName: string
-    email: string
-    _id: string
-    createdOn: Date
+    userInfo: User | null
+    onSearchNote: (query: string) => void
+    handleClearSearch: () => void
 }

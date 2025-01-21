@@ -4,6 +4,13 @@ import { FaSearch } from "react-icons/fa"
 import { IoMdClose } from "react-icons/io"
 
 const SearchBar: FC<SearchBarProps> = ({ value, onChange, handleSearch, onClearSearch }) => {
+    const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === "Enter") {
+            handleSearch()
+            ;(event.target as HTMLInputElement).blur() //Убрать фокус со строки поиска
+        }
+    }
+
     return (
         <div className="w-80 flex items-center px-4 bg-slate-100 rounded-md">
             <input
@@ -12,6 +19,7 @@ const SearchBar: FC<SearchBarProps> = ({ value, onChange, handleSearch, onClearS
                 className="w-full text-xs bg-transparent py-[11px] outline-none"
                 value={value}
                 onChange={onChange}
+                onKeyDown={onKeyDown}
             />
             {value && (
                 <IoMdClose
