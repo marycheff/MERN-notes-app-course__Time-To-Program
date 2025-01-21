@@ -139,6 +139,33 @@ const Home = () => {
         }
     }
 
+    const updateIsPinned = async (noteData: Note) => {
+        const noteId = noteData._id
+        console.log(noteData)
+        try {
+            const response = await axiosInstance.put(`/update-note-pinned/${noteId}`, {
+                isPinned: !noteData.isPinned,
+            })
+
+            if (response.data && response.data.note) {
+                if (!noteData.isPinned) {
+                    showToastMessage("Заметка закреплена успешно")
+                } else {
+                    showToastMessage("Заметка откреплена успешно")
+                }
+                getAllNotes()
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response && error.response.data && error.response.data.message) {
+                    setError(error.response.data.message)
+                }
+            } else {
+                setError("Непредвиденная ошибка")
+            }
+        }
+    }
+
     const handleClearSearch = () => {
         setIsSearch(false)
         getAllNotes()
@@ -153,9 +180,6 @@ const Home = () => {
     if (error) {
         return <p className="text-red-500 text-xs">{error}</p>
     }
-    // if (isLoading) {
-    //     return <p className="text-red-500 text-xs">Загрузка</p>
-    // }
 
     return (
         <>
@@ -190,18 +214,14 @@ const Home = () => {
                                 isPinned={item.isPinned}
                                 onEdit={() => handleEdit(item)}
                                 onDelete={() => deleteNote(item)}
-                                onPinNote={() => {}}
+                                onPinNote={() => updateIsPinned(item)}
                             />
                         ))}
                     </div>
                 ) : (
                     <EmptyCard
                         imgSrc={isSearch ? NodDataImg : AddNotesImg}
-                        message={
-                            isSearch
-                                ? "Ничего не нашлось"
-                                : "У вас нет заметок"
-                        }
+                        message={isSearch ? "Ничего не нашлось" : "У вас нет заметок"}
                     />
                 )}
             </div>
