@@ -2,17 +2,14 @@
     "version": 2,
     "builds": [
         {
-            "src": "backend/index.ts", 
-            "use": "@vercel/node" 
+            "src": "backend/src/index.ts",
+            "use": "@vercel/node"
         }
     ],
     "routes": [
         {
-            "src": "/(.*)", 
-            "dest": "backend/index.ts"
+            "src": "/(.*)",
+            "dest": "backend/src/index.ts"
         }
-    ],
-    "env": {
-        "MY_ENV_VARIABLE": "value" 
-    }
+    ]
 }
