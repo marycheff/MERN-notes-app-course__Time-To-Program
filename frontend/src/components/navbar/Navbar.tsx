@@ -13,12 +13,12 @@ const Navbar: FC<NavbarProps> = ({ userInfo, onSearchNote, handleClearSearch }) 
     const [searchQuery, setSearchQuery] = useState("")
     const handleSearch = () => {
         if (searchQuery) {
-            onSearchNote(searchQuery)
+            if (onSearchNote) onSearchNote(searchQuery)
         }
     }
     const onClearSearch = () => {
         setSearchQuery("")
-        handleClearSearch()
+        if (handleClearSearch) handleClearSearch()
     }
     return (
         <div className="bg-white flex items-center justify-between px-6 py-2 drop-shadow">
